@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: bohoman
+      POSTGRES_USER: ${BOHOMAN_DATABASE_USER:-bohoman_dev}
+      POSTGRES_PASSWORD: ${BOHOMAN_DATABASE_PASSWORD:?Set BOHOMAN_DATABASE_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${BOHOMAN_DATABASE_PORT:-5432}:5432"
+    volumes:
+      - bohoman_postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  bohoman_postgres:
