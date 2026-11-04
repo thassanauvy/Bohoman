@@ -97,17 +97,13 @@ class DashboardViewModel(private val api: BohomanApi, private val scope: Corouti
     // Keep the returned version so the next edit never reuses the pre-save version.
     private fun applySavedTask(saved: TaskDto) = mutableState.update { current ->
         val taskList = current.tasks.filterNot { it.id == saved.id } + listOfNotNull(saved.takeIf { it.deletedAt == null })
-        val item = saved.deadline?.takeIf { !saved.completed && saved.deletedAt == null }?.let {
-            DashboardItem(saved.id, DashboardSource.TASK, saved.title, saved.description, it, saved.version)
-        }
+        val item = saved.toDashboardItemOrNull()
         current.copy(tasks = taskList, dashboard = current.dashboard.filterNot { it.source == DashboardSource.TASK && it.id == saved.id } + listOfNotNull(item))
     }
 
     private fun applySavedCountdown(saved: CountdownDto) = mutableState.update { current ->
         val countdownList = current.countdowns.filterNot { it.id == saved.id } + listOfNotNull(saved.takeIf { it.deletedAt == null })
-        val item = saved.takeIf { it.deletedAt == null }?.let {
-            DashboardItem(it.id, DashboardSource.COUNTDOWN, it.title, it.description, it.target, it.version)
-        }
+        val item = saved.toDashboardItemOrNull()
         current.copy(countdowns = countdownList, dashboard = current.dashboard.filterNot { it.source == DashboardSource.COUNTDOWN && it.id == saved.id } + listOfNotNull(item))
     }
 
